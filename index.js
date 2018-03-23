@@ -6,12 +6,24 @@ const pdfUtil = require('pdf-to-text');
 const SOURCE = './source';
 const OUTPUT = './output';
 
+Array.prototype.delayedForEach = function(callback, timeout, thisArg){
+    var i = 0,
+      l = this.length,
+      self = this,
+      caller = function(){
+        callback.call(thisArg || self, self[i], i, self);
+        (++i < l) && setTimeout(caller, timeout);
+      };
+    caller();
+  };
+
 fs.readdir(SOURCE, (err, list)=>{
     if(err){
        return console.log(err);
     }
+    console.log(list);
     let processed = 0;
-    list.forEach((file)=>{
+    list.delayedForEach((file)=>{
         const fileToConvertPath = path.join(SOURCE, file);
         pdfUtil.pdfToText(fileToConvertPath, null, function(err, data){
             if(err){
@@ -29,7 +41,7 @@ fs.readdir(SOURCE, (err, list)=>{
                 });
             }
         })
-    })
+    }, 50);
 })
 
 
